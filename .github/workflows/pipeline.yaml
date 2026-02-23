@@ -58,10 +58,8 @@ jobs:
       - name: Apply Manifests
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          kubectl apply -f mysql-pvc.yaml
-          kubectl apply -f mysql-dep.yaml
-          kubectl apply -f wordpress-pvc.yaml
-          kubectl apply -f wordpress-dep.yaml
+          # This command applies EVERYTHING ending in .yaml in the current folder
+          kubectl apply -f .
           
           kubectl rollout restart deployment/wordpress || echo "First deploy"
           kubectl rollout restart deployment/mysql || echo "First deploy"
