@@ -3,17 +3,15 @@ on:
   push:
     branches: [ main ]
 jobs:
-  deploy-to-k8s:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          cat << 'LITERAL_EOF' > ~/.kube/config
-          ${{ secrets.KUBECONFIG }}
-          LITERAL_EOF
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
-      - name: Verify K8s
-        run: kubectl get nodes || echo "Waiting for auth plugin if needed"
+      - name: Check Nodes
+        run: kubectl get nodes || echo "Auth plugin missing but config is set"
