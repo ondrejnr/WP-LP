@@ -55,11 +55,14 @@ jobs:
           LITERAL_EOF
           chmod 600 ~/.kube/config
 
-      - name: Apply Manifests
+- name: Apply Manifests
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          # We use the dot to avoid specific filename errors
-          kubectl apply -f .
-          
+          # Apply ONLY files ending in .yaml
+          kubectl apply -f mysql-pvc.yaml
+          kubectl apply -f mysql-dep.yaml
+          kubectl apply -f wordpress-pvc.yaml
+          kubectl apply -f wordpress-dep.yaml
+
           kubectl rollout restart deployment/wordpress || echo "First deploy"
-          kubectl rollout restart deployment/mysql || echo "First deploy"
+          kubectl rollout restart deployment/mysql || echo "First deploy""
