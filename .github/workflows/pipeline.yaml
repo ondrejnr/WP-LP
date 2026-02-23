@@ -1,52 +1,43 @@
 name: Build and Deploy
-
 on:
   push:
     branches: [ main ]
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-custom-wordpress:latest
-
   deploy-to-k8s:
     needs: build-and-push
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       id-token: 'write'
-      
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
           token_format: 'access_token'
           workload_identity_provider: 'projects/304935835827/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
           service_account: 'github-deployer@project-cea37556-bc1e-4fd1-801.iam.gserviceaccount.com'
-
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
           install_components: 'gke-gcloud-auth-plugin'
-
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -54,15 +45,11 @@ jobs:
           ${{ secrets.KUBECONFIG }}
           LITERAL_EOF
           chmod 600 ~/.kube/config
-
       - name: Apply Manifests
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          # Explicitly listing files to ignore the GHA credential JSON
-          kubectl apply -f mysql-pvc.yaml
-          kubectl apply -f mysql-dep.yaml
-          kubectl apply -f wordpress-pvc.yaml
-          kubectl apply -f wordpress-dep.yaml
+          # This loop is the key: it only touches .yaml files
+          for f in *.yaml; do kubectl apply -f $f; done
           
           kubectl rollout restart deployment/wordpress || echo "First deploy"
           kubectl rollout restart deployment/mysql || echo "First deploy"
