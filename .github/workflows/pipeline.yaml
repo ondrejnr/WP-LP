@@ -58,7 +58,7 @@ jobs:
       - name: Apply Manifests
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          # This command applies EVERYTHING ending in .yaml in the current folder
+          # We use the dot to avoid specific filename errors
           kubectl apply -f .
           
           kubectl rollout restart deployment/wordpress || echo "First deploy"
