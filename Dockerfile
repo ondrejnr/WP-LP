@@ -1,7 +1,8 @@
-# Use the official Bitnami WordPress image as the base
-FROM bitnami/wordpress:latest
+FROM wordpress:latest
 
-# You can add custom themes or plugins here in the future
-# Example: COPY ./my-theme /opt/bitnami/wordpress/wp-content/themes/my-theme
+# Copy our custom CSS into the container
+COPY custom-style.css /tmp/custom-style.css
 
-EXPOSE 8080 8443
+# Append our custom CSS to the active theme's style.css
+# This targets the 'twentytwentyfive' theme specifically
+RUN cat /tmp/custom-style.css >> /var/www/html/wp-content/themes/twentytwentyfive/style.css

@@ -1,0 +1,5 @@
+/* This will turn the background red and text white for a very obvious test */
+body, .wp-site-blocks {
+    background-color: #ff4444 !important;
+    color: white !important;
+}
