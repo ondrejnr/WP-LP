@@ -58,12 +58,11 @@ jobs:
       - name: Apply Manifests
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          # We apply only the YAML files to avoid the JSON credential error
+          # Explicitly naming files to avoid deploying the JSON creds
           kubectl apply -f mysql-pvc.yaml
           kubectl apply -f mysql-dep.yaml
           kubectl apply -f wordpress-pvc.yaml
           kubectl apply -f wordpress-dep.yaml
-
-          # Refresh the deployments to ensure they use the latest settings
+          
           kubectl rollout restart deployment/wordpress || echo "First deploy"
-          kubectl rollout restart deployment/mysql || echo "First deploy""
+          kubectl rollout restart deployment/mysql || echo "First deploy"
