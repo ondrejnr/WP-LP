@@ -31,15 +31,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Set up Kubeconfig
-        env:
-          KUBE_DATA: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
-          # We use the variable directly to preserve the structure
-          echo "$KUBE_DATA" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-      - name: Apply Kubernetes Manifests
-        run: |
-          kubectl apply -f mysql-pvc.yaml
-          kubectl apply -f mysql-dep.yaml
-          kubectl rollout restart deployment/my-web-wordpress
+          cat << 'EOF' > ~/.kube/config
+          ${{ secrets.KUBECONFIG }}
+          EOF
+          chmod 600 ~/.kube/configs
