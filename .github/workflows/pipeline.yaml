@@ -40,7 +40,8 @@ jobs:
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          cat <<'EOF' > ~/.kube/config
+          # Using 'EOF' in quotes prevents the shell from trying to evaluate the Kubeconfig text
+          cat << 'EOF' > ~/.kube/config
           ${{ secrets.KUBECONFIG }}
           EOF
           chmod 600 ~/.kube/config
@@ -50,4 +51,5 @@ jobs:
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           kubectl apply -f mysql-pvc.yaml
           kubectl apply -f mysql-dep.yaml
-          kubectl rollout restart deployment/my-web-wordpress || echo "First deploy"
+          # We use a generic restart to ensure the new image is pulled
+          kubectl rollout restart deployment/my-web-wordpress || echo "Deployment not found yet"
