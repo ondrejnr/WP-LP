@@ -59,7 +59,8 @@ jobs:
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           # This command only touches .yaml files and ignores everything else (like .json)
-          kubectl apply -f *.yaml
+          kubectl apply -f *.yaml.yaml
 
           kubectl rollout restart deployment/wordpress || echo "First deploy"
           kubectl rollout restart deployment/mysql || echo "First deploy""
+# Last update: Mon Feb 23 08:06:42 AM UTC 2026
