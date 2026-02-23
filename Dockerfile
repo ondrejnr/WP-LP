@@ -1,8 +1,10 @@
 FROM wordpress:latest
 
-# Copy our custom CSS into the container
-COPY custom-style.css /tmp/custom-style.css
+# 1. Create the theme directory manually so the build doesn't fail
+RUN mkdir -p /var/www/html/wp-content/themes/twentytwentyfive/
 
-# Append our custom CSS to the active theme's style.css
-# This targets the 'twentytwentyfive' theme specifically
-RUN cat /tmp/custom-style.css >> /var/www/html/wp-content/themes/twentytwentyfive/style.css
+# 2. Copy our custom CSS directly as the main style sheet
+COPY custom-style.css /var/www/html/wp-content/themes/twentytwentyfive/style.css
+
+# 3. Fix permissions so WordPress can read it
+RUN chown -R www-data:www-data /var/www/html/wp-content/themes/twentytwentyfive/

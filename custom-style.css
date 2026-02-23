@@ -1,4 +1,8 @@
-/* This will turn the background red and text white for a very obvious test */
+/*
+Theme Name: Custom Red Theme
+Description: Test for Pipeline
+Version: 1.0
+*/
 body, .wp-site-blocks {
     background-color: #ff4444 !important;
     color: white !important;
