@@ -1,17 +1,58 @@
 name: Build and Deploy
+
 on:
   push:
     branches: [ main ]
+
 jobs:
-  deploy-new:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-custom-wordpress:latest
+
+  deploy-to-k8s:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install GKE Auth Plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update && sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin kubectl -y
+
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          cat << 'EOF' > ~/.kube/config
+          ${{ secrets.KUBECONFIG }}
+          EOF
           chmod 600 ~/.kube/config
-      - name: Verify Connection
-        run: kubectl get nodes || echo "Config setup done"
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+          # Nasazení MySQL a WordPressu
+          kubectl apply -f mysql-pvc.yaml
+          kubectl apply -f mysql-dep.yaml
+          # Zde přidej své další YAML soubory, pokud je máš (např. wordpress-dep.yaml)
+
+          # Restartování deploymentu, aby se načetly nejnovější verze obrazů
+          kubectl rollout restart deployment/wordpress || echo "Deployment wordpress zatím neexistuje"
+          kubectl rollout restart deployment/mysql || echo "Deployment mysql zatím neexistuje"
