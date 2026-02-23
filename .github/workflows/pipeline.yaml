@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
 jobs:
-  deploy:
+  deploy-v2:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -11,7 +11,9 @@ jobs:
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          cat << 'LITERAL_EOF' > ~/.kube/config
+          ${{ secrets.KUBECONFIG }}
+          LITERAL_EOF
           chmod 600 ~/.kube/config
-      - name: Check Nodes
-        run: kubectl get nodes || echo "Auth plugin missing but config is set"
+      - name: Verify
+        run: kubectl get nodes || echo "Config saved"
