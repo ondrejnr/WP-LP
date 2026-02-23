@@ -58,7 +58,7 @@ jobs:
       - name: Apply Manifests
         run: |
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-          # We specify the files to skip the gha-creds JSON file
+          # Explicitly listing files to ignore the GHA credential JSON
           kubectl apply -f mysql-pvc.yaml
           kubectl apply -f mysql-dep.yaml
           kubectl apply -f wordpress-pvc.yaml
