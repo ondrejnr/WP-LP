@@ -32,14 +32,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Kubeconfig
+        env:
+          KUBE_DATA: ${{ secrets.KUBECONFIG }}
         run: |
           mkdir -p ~/.kube
-          # We are using a 'heredoc' here to safely handle the multi-line text
-          cat <<EOF > ~/.kube/config
-          ${{ secrets.KUBECONFIG }}
-          EOF
+          # We use the variable directly to preserve the structure
+          echo "$KUBE_DATA" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
-
       - name: Apply Kubernetes Manifests
         run: |
           kubectl apply -f mysql-pvc.yaml
