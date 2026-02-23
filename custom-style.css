@@ -1,9 +1,8 @@
-/*
-Theme Name: Custom Red Theme
-Description: Test for Pipeline
-Version: 1.0
-*/
-body, .wp-site-blocks {
-    background-color: #ff4444 !important;
-    color: white !important;
+/* Final Pipeline Test */
+body {
+    background-color: #ff0000 !important; /* Pure Red */
+}
+
+.wp-block-site-title a, h1, h2, p {
+    color: #ffffff !important; /* White text for contrast */
 }

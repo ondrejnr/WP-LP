@@ -1,10 +1,10 @@
 FROM wordpress:latest
 
-# Create the directory so the build doesn't fail
-RUN mkdir -p /var/www/html/wp-content/themes/twentytwentyfive/
+# Create the theme directory in the source location
+RUN mkdir -p /usr/src/wordpress/wp-content/themes/twentytwentyfive
 
-# Copy the style file
-COPY custom-style.css /var/www/html/wp-content/themes/twentytwentyfive/style.css
+# Copy your custom CSS into that directory
+COPY custom-style.css /usr/src/wordpress/wp-content/themes/twentytwentyfive/style.css
 
-# Fix permissions
-RUN chown -R www-data:www-data /var/www/html/wp-content/themes/twentytwentyfive/
+# Ensure the web server owns the files
+RUN chown -R www-data:www-data /usr/src/wordpress/wp-content
