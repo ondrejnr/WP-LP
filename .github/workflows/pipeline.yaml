@@ -30,10 +30,24 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Install GKE Auth Plugin
+        run: |
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update && sudo apt-get install google-cloud-sdk-gke-gcloud-auth-plugin kubectl -y
+
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          cat << 'EOF' > ~/.kube/config
+          cat <<'EOF' > ~/.kube/config
           ${{ secrets.KUBECONFIG }}
           EOF
-          chmod 600 ~/.kube/configs
+          chmod 600 ~/.kube/config
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+          kubectl apply -f mysql-pvc.yaml
+          kubectl apply -f mysql-dep.yaml
+          kubectl rollout restart deployment/my-web-wordpress || echo "First deploy"
